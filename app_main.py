@@ -256,7 +256,7 @@ def generate_summary_openai(text):
 def main():
     load_dotenv()
 
-    st.title('CV Insights - Análisis de CVs')
+    st.title('CV Insights')
 
     uploaded_file = st.file_uploader("Carga un CV en formato PDF", type="pdf")
 
