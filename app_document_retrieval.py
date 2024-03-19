@@ -51,7 +51,7 @@ def main():
     qdrant_client = connect_to_qdrant()
 
     # Campo de entrada para la pregunta del usuario
-    user_query = st.text_input("Introduce el perfil (en inglés):")
+    user_query = st.text_input("Haz una pregunta sobre la base de datos de CVs:")
 
     if user_query:
         # Generar embedding para la pregunta
