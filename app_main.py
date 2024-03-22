@@ -20,6 +20,8 @@ import spacy
 from openai import OpenAI
 import fitz
 import joblib
+import pickle
+
 
 # Inicializa el modelo y el tokenizador una sola vez
 tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
@@ -85,6 +87,21 @@ def generate_embeddings(chunks):
     
     return points
 
+def generate_embeddings_hf(chunks):
+    points = []
+    i = 1
+    for chunk in chunks:
+        i += 1
+        # Tokeniza el texto
+        inputs = tokenizer(chunk, return_tensors='pt', padding=True, truncation=True, max_length=512)
+        # Genera los embeddings
+        with torch.no_grad():
+            outputs = model(**inputs)
+        embeddings = outputs.last_hidden_state.mean(dim=1).numpy()[0]
+        
+        points.append(PointStruct(id=i, vector=embeddings.tolist(), payload={"text": chunk}))
+    
+    return points
 
 def index_embeddings(points, qdrant_client, collection_name):
     operation_info = qdrant_client.upsert(
@@ -125,23 +142,6 @@ def create_answer_with_context(query, qdrant_client, collection_name):
     return completion.choices[0].message.content
 
 
-def generate_embeddings_hf(chunks):
-    points = []
-    i = 1
-    for chunk in chunks:
-        i += 1
-        # Tokeniza el texto
-        inputs = tokenizer(chunk, return_tensors='pt', padding=True, truncation=True, max_length=512)
-        # Genera los embeddings
-        with torch.no_grad():
-            outputs = model(**inputs)
-        embeddings = outputs.last_hidden_state.mean(dim=1).numpy()[0]
-        
-        points.append(PointStruct(id=i, vector=embeddings.tolist(), payload={"text": chunk}))
-    
-    return points
-
-
 def create_answer_with_context_hf(query, qdrant_client, collection_name):
     # Tokeniza y genera embeddings para la consulta
     inputs = tokenizer(query, return_tensors='pt', padding=True, truncation=True, max_length=512)
@@ -178,7 +178,7 @@ def classify_text(text):
     classification = classifier(text, candidate_labels=categories)
     return classification['labels'][0]
 
-import pickle
+
 
 def classify_text_pkl(text):
     # Carga el modelo preentrenado
