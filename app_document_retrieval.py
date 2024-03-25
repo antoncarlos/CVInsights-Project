@@ -39,7 +39,7 @@ def search_in_qdrant(qdrant_client, query_embedding):
     search_result = qdrant_client.search(
         collection_name="DOCUMENT-EMBEDDINGS",
         query_vector=query_embedding,
-        limit=5  # Ajusta este valor según necesites
+        limit=5  # Podemos cambiarlo, por defecto pongo 5
     )
     return search_result
 

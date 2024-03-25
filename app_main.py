@@ -179,10 +179,9 @@ def classify_text(text):
     return classification['labels'][0]
 
 
-
 def classify_text_pkl(text):
     # Carga el modelo preentrenado
-    model_path = './CV-classification/MultinomialNB_best_model.pkl'
+    model_path = './CV-classification/RandomForestClassifier_best_model.pkl'
     with open(model_path, 'rb') as file:
         model = pickle.load(file)
     # Cargar el vectorizador y el encoder
@@ -200,7 +199,8 @@ def classify_text_pkl(text):
 
 
 def extract_named_entities_hf(text):
-    ner_pipeline = pipeline("ner", model="dbmdz/bert-large-cased-finetuned-conll03-english")
+    ner_pipeline = pipeline("ner", model="reyhanemyr/bert-base-NER-finetuned-cv")
+    #ner_pipeline = pipeline("ner", model="dbmdz/bert-large-cased-finetuned-conll03-english")
     entities = ner_pipeline(text)
     # Transformar las entidades a un formato común
     transformed_entities = []
@@ -227,26 +227,20 @@ def generate_summary_hf(text):
     summary = summarizer(text, max_length=130, min_length=30, do_sample=False)
     return summary[0]['summary_text']
 
-#client = OpenAI(api_key=api_key)
 
 def generate_summary_openai(text):
     try:
         # Crear una solicitud de completación de chat para generar el resumen
-        chat_completion = client.chat.completions.create(
+
+        prompt = "Please summarize the following text:\n" + text
+
+        completion = openai.chat.completions.create(
+            model="gpt-4-0125-preview",
             messages=[
-                {
-                    "role": "system",
-                    "content": "You are a highly knowledgeable assistant tasked with summarizing documents."
-                },
-                {
-                    "role": "user",
-                    "content": f"Please summarize this document: {text}"
-                }
-            ],
-            model="gpt-3.5-turbo",  # Asegúrate de utilizar el modelo adecuado para tu caso
+                {"role": "user", "content": prompt}
+            ]
         )
-        # Extraer y devolver el texto de la respuesta
-        return chat_completion["choices"][0]["message"]["content"]
+        return completion.choices[0].message.content
     except Exception as e:
         print(f"Error al generar el resumen con OpenAI: {e}")
         return None
