@@ -4,15 +4,15 @@ import openai
 from dotenv import load_dotenv
 import os
 
-# Carga las variables de entorno
+# Cargamos las variables de entorno
 load_dotenv()
 
-# Configura tus claves API
+# Configuramos claves API y variables de entorno
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 QDRANT_HOST = os.getenv('QDRANT_HOST')
 QDRANT_API_KEY = os.getenv('QDRANT_API_KEY')
 
-# Inicializa el cliente de OpenAI
+# Inicialización del cliente de OpenAI
 openai.api_key = OPENAI_API_KEY
 
 # Función para conectarse a Qdrant
@@ -26,9 +26,9 @@ def connect_to_qdrant():
 def generate_query_embedding(query):
     response = openai.embeddings.create(
         model="text-embedding-ada-002",
-        input=[query]  # Nota que 'input' ahora debe ser una lista
+        input=[query]  
     )
-    # Accede directamente al atributo deseado de la respuesta
+    # Accedemos directamente al atributo deseado de la respuesta
     embedding = response.data[0].embedding
     return embedding
 
@@ -39,7 +39,7 @@ def search_in_qdrant(qdrant_client, query_embedding):
     search_result = qdrant_client.search(
         collection_name="DOCUMENT-EMBEDDINGS",
         query_vector=query_embedding,
-        limit=5  # Podemos cambiarlo, por defecto pongo 5
+        limit=5  # Podemos cambiarlo, por defecto ponemos 5
     )
     return search_result
 
